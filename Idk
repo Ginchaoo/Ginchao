@@ -200,7 +200,7 @@ function LiteFlux:Init()
 
         function TabItems:AddToggle(text, callback)
             local f = Instance.new("Frame")
-            f.Size = UDim2.new(1, 0, 0, 20)
+            f.Size = UDim2.new(1, 0, 0, 40)
             f.BackgroundTransparency = 1
             f.Parent = page
             local l = Instance.new("TextLabel")
