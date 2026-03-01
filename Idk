@@ -109,9 +109,9 @@ function LiteFlux:Init()
 
     local MiniLogo = Instance.new("ImageButton")
     MiniLogo.Size = UDim2.new(0, 50, 0, 50)
-    MiniLogo.Position = Main.Position
+    MiniLogo.Position = UDim2.new(0, 20, 0.5, -25)
     MiniLogo.BackgroundColor3 = CurrentTheme.Primary
-    MiniLogo.Image = "rbxassetid://97657691846760"
+    MiniLogo.Image = "rbxassetid://134768393521360"
     MiniLogo.Visible = false
     MiniLogo.Parent = ScreenGui
     Instance.new("UICorner", MiniLogo).CornerRadius = UDim.new(1, 0)
@@ -119,7 +119,6 @@ function LiteFlux:Init()
     local function SmoothDrag(obj)
         local dragStart, startPos
         local dragging = false
-
         obj.InputBegan:Connect(function(input)
             if (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then
                 dragging = true
@@ -132,7 +131,6 @@ function LiteFlux:Init()
                 end)
             end
         end)
-
         UserInputService.InputChanged:Connect(function(input)
             if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
                 local delta = input.Position - dragStart
@@ -146,13 +144,11 @@ function LiteFlux:Init()
     SmoothDrag(MiniLogo)
 
     CloseBtn.MouseButton1Click:Connect(function()
-        MiniLogo.Position = Main.Position
         Main.Visible = false
         MiniLogo.Visible = true
     end)
 
     MiniLogo.MouseButton1Click:Connect(function()
-        Main.Position = MiniLogo.Position
         Main.Visible = true
         MiniLogo.Visible = false
     end)
