@@ -280,3 +280,5 @@ function LiteFlux:Init()
 
     return LiteFlux
 end
+
+return LiteFlux
