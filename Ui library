@@ -1,0 +1,282 @@
+local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+
+local LiteFlux = {}
+
+local Themes = {
+    Light = {
+        MainFrame = Color3.fromRGB(245, 245, 247),
+        Header = Color3.fromRGB(255, 255, 255),
+        Text = Color3.fromRGB(28, 28, 30),
+        SecText = Color3.fromRGB(142, 142, 147),
+        Primary = Color3.fromRGB(0, 122, 255),
+        Border = Color3.fromRGB(220, 220, 225),
+        TabActive = Color3.fromRGB(255, 255, 255),
+        TabInActive = Color3.fromRGB(230, 230, 235)
+    },
+    Dark = {
+        MainFrame = Color3.fromRGB(28, 28, 30),
+        Header = Color3.fromRGB(44, 44, 46),
+        Text = Color3.fromRGB(255, 255, 255),
+        SecText = Color3.fromRGB(174, 174, 178),
+        Primary = Color3.fromRGB(10, 132, 255),
+        Border = Color3.fromRGB(58, 58, 60),
+        TabActive = Color3.fromRGB(58, 58, 60),
+        TabInActive = Color3.fromRGB(44, 44, 46)
+    }
+}
+
+local CurrentTheme = Themes.Dark
+
+function LiteFlux:Init()
+    local ScreenGui = Instance.new("ScreenGui")
+    ScreenGui.Name = "TobiHub_UI"
+    ScreenGui.ResetOnSpawn = false
+    ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
+    local Main = Instance.new("Frame")
+    Main.Name = "Main"
+    Main.Size = UDim2.new(0, 400, 0, 300)
+    Main.Position = UDim2.new(0.5, -200, 0.5, -150)
+    Main.BackgroundColor3 = CurrentTheme.MainFrame
+    Main.ClipsDescendants = true
+    Main.Parent = ScreenGui
+    Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 12)
+
+    local Header = Instance.new("Frame")
+    Header.Size = UDim2.new(1, 0, 0, 40)
+    Header.BackgroundColor3 = CurrentTheme.Header
+    Header.BorderSizePixel = 0
+    Header.Parent = Main
+
+    local Logo = Instance.new("ImageLabel")
+    Logo.Name = "Logo"
+    Logo.Size = UDim2.new(0, 24, 0, 24)
+    Logo.Position = UDim2.new(0, 12, 0.5, 0)
+    Logo.AnchorPoint = Vector2.new(0, 0.5)
+    Logo.BackgroundTransparency = 1
+    Logo.Image = "rbxassetid://71685352492976"
+    Logo.Parent = Header
+
+    local Title = Instance.new("TextLabel")
+    Title.Text = "                Tobi Hub"
+    Title.Font = Enum.Font.GothamBold
+    Title.TextSize = 14
+    Title.TextColor3 = CurrentTheme.Text
+    Title.Position = UDim2.new(0, 42, 0.5, 0)
+    Title.AnchorPoint = Vector2.new(0, 0.5)
+    Title.BackgroundTransparency = 1
+    Title.Parent = Header
+
+    local CloseBtn = Instance.new("TextButton")
+    CloseBtn.Size = UDim2.new(0, 30, 0, 30)
+    CloseBtn.Position = UDim2.new(1, -35, 0.5, -15)
+    CloseBtn.BackgroundColor3 = Color3.fromRGB(255, 59, 48)
+    CloseBtn.Text = "X"
+    CloseBtn.TextColor3 = Color3.new(1,1,1)
+    CloseBtn.Font = Enum.Font.GothamBold
+    CloseBtn.Parent = Header
+    Instance.new("UICorner", CloseBtn).CornerRadius = UDim.new(0, 6)
+
+    local ThemeTgl = Instance.new("TextButton")
+    ThemeTgl.Size = UDim2.new(0, 30, 0, 30)
+    ThemeTgl.Position = UDim2.new(1, -70, 0.5, -15)
+    ThemeTgl.BackgroundColor3 = CurrentTheme.Border
+    ThemeTgl.Text = "◐"
+    ThemeTgl.TextSize = 18
+    ThemeTgl.TextColor3 = CurrentTheme.Text
+    ThemeTgl.Parent = Header
+    Instance.new("UICorner", ThemeTgl).CornerRadius = UDim.new(0, 6)
+
+    local TabContainer = Instance.new("Frame")
+    TabContainer.Size = UDim2.new(1, -20, 0, 30)
+    TabContainer.Position = UDim2.new(0, 10, 0, 45)
+    TabContainer.BackgroundTransparency = 1
+    TabContainer.Parent = Main
+
+    local TabList = Instance.new("UIListLayout")
+    TabList.FillDirection = Enum.FillDirection.Horizontal
+    TabList.Padding = UDim.new(0, 5)
+    TabList.Parent = TabContainer
+
+    local PageContainer = Instance.new("Frame")
+    PageContainer.Size = UDim2.new(1, -20, 1, -85)
+    PageContainer.Position = UDim2.new(0, 10, 0, 80)
+    PageContainer.BackgroundTransparency = 1
+    PageContainer.Parent = Main
+
+    local MiniLogo = Instance.new("ImageButton")
+    MiniLogo.Size = UDim2.new(0, 50, 0, 50)
+    MiniLogo.Position = Main.Position
+    MiniLogo.BackgroundColor3 = CurrentTheme.Primary
+    MiniLogo.Image = "rbxassetid://71685352492976"
+    MiniLogo.Visible = false
+    MiniLogo.Parent = ScreenGui
+    Instance.new("UICorner", MiniLogo).CornerRadius = UDim.new(1, 0)
+
+    local function SmoothDrag(obj)
+        local dragStart, startPos
+        local dragging = false
+
+        obj.InputBegan:Connect(function(input)
+            if (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then
+                dragging = true
+                dragStart = input.Position
+                startPos = obj.Position
+                input.Changed:Connect(function()
+                    if input.UserInputState == Enum.UserInputState.End then
+                        dragging = false
+                    end
+                end)
+            end
+        end)
+
+        UserInputService.InputChanged:Connect(function(input)
+            if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+                local delta = input.Position - dragStart
+                TweenService:Create(obj, TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                    Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+                }):Play()
+            end
+        end)
+    end
+    SmoothDrag(Main)
+    SmoothDrag(MiniLogo)
+
+    CloseBtn.MouseButton1Click:Connect(function()
+        MiniLogo.Position = Main.Position
+        Main.Visible = false
+        MiniLogo.Visible = true
+    end)
+
+    MiniLogo.MouseButton1Click:Connect(function()
+        Main.Position = MiniLogo.Position
+        Main.Visible = true
+        MiniLogo.Visible = false
+    end)
+
+    local tabs = {}
+    function LiteFlux:AddTab(name)
+        local btn = Instance.new("TextButton")
+        btn.Size = UDim2.new(0, 80, 1, 0)
+        btn.BackgroundColor3 = CurrentTheme.TabInActive
+        btn.Text = name
+        btn.TextColor3 = CurrentTheme.SecText
+        btn.Font = Enum.Font.GothamMedium
+        btn.Parent = TabContainer
+        Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
+
+        local page = Instance.new("ScrollingFrame")
+        page.Size = UDim2.new(1, 0, 1, 0)
+        page.BackgroundTransparency = 1
+        page.Visible = #tabs == 0
+        page.ScrollBarThickness = 0
+        page.Parent = PageContainer
+        if page.Visible then btn.BackgroundColor3 = CurrentTheme.TabActive btn.TextColor3 = CurrentTheme.Primary end
+
+        Instance.new("UIListLayout", page).Padding = UDim.new(0, 8)
+
+        btn.MouseButton1Click:Connect(function()
+            for _, v in pairs(tabs) do
+                v.p.Visible = false
+                v.b.BackgroundColor3 = CurrentTheme.TabInActive
+                v.b.TextColor3 = CurrentTheme.SecText
+            end
+            page.Visible = true
+            btn.BackgroundColor3 = CurrentTheme.TabActive
+            btn.TextColor3 = CurrentTheme.Primary
+        end)
+
+        local TabItems = {}
+        function TabItems:AddButton(text, callback)
+            local b = Instance.new("TextButton")
+            b.Size = UDim2.new(1, 0, 0, 35)
+            b.BackgroundColor3 = CurrentTheme.Primary
+            b.Text = text
+            b.TextColor3 = Color3.new(1,1,1)
+            b.Font = Enum.Font.GothamBold
+            b.Parent = page
+            Instance.new("UICorner", b).CornerRadius = UDim.new(0, 8)
+            b.MouseButton1Click:Connect(callback or function() end)
+        end
+
+        function TabItems:AddToggle(text, callback)
+            local f = Instance.new("Frame")
+            f.Size = UDim2.new(1, 0, 0, 30)
+            f.BackgroundTransparency = 1
+            f.Parent = page
+            local l = Instance.new("TextLabel")
+            l.Size = UDim2.new(1, -50, 1, 0)
+            l.Text = text
+            l.TextColor3 = CurrentTheme.SecText
+            l.BackgroundTransparency = 1
+            l.TextXAlignment = Enum.TextXAlignment.Left
+            l.Font = Enum.Font.Gotham
+            l.Parent = f
+            local t = Instance.new("TextButton")
+            t.Size = UDim2.new(0, 40, 0, 20)
+            t.Position = UDim2.new(1, -40, 0.5, -10)
+            t.BackgroundColor3 = CurrentTheme.Border
+            t.Text = ""
+            t.Parent = f
+            Instance.new("UICorner", t).CornerRadius = UDim.new(1, 0)
+            local k = Instance.new("Frame")
+            k.Size = UDim2.new(0, 16, 0, 16)
+            k.Position = UDim2.new(0, 2, 0.5, -8)
+            k.BackgroundColor3 = Color3.new(1,1,1)
+            k.Parent = t
+            Instance.new("UICorner", k).CornerRadius = UDim.new(1, 0)
+            local s = false
+            t.MouseButton1Click:Connect(function()
+                s = not s
+                if s then
+                    TweenService:Create(k, TweenInfo.new(0.2), {Position = UDim2.new(1, -18, 0.5, -8)}):Play()
+                    TweenService:Create(t, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(52, 199, 89)}):Play()
+                else
+                    TweenService:Create(k, TweenInfo.new(0.2), {Position = UDim2.new(0, 2, 0.5, -8)}):Play()
+                    TweenService:Create(t, TweenInfo.new(0.2), {BackgroundColor3 = CurrentTheme.Border}):Play()
+                end
+                if callback then callback(s) end
+            end)
+        end
+
+        function TabItems:AddLabel(text)
+            local lbl = Instance.new("TextLabel")
+            lbl.Size = UDim2.new(1, 0, 0, 20)
+            lbl.Text = text
+            lbl.TextColor3 = CurrentTheme.SecText
+            lbl.BackgroundTransparency = 1
+            lbl.TextXAlignment = Enum.TextXAlignment.Left
+            lbl.Font = Enum.Font.Gotham
+            lbl.Parent = page
+        end
+
+        table.insert(tabs, {p = page, b = btn})
+        return TabItems
+    end
+
+    ThemeTgl.MouseButton1Click:Connect(function()
+        local isD = CurrentTheme == Themes.Light
+        CurrentTheme = isD and Themes.Dark or Themes.Light
+        Main.BackgroundColor3 = CurrentTheme.MainFrame
+        Header.BackgroundColor3 = CurrentTheme.Header
+        Title.TextColor3 = CurrentTheme.Text
+        ThemeTgl.TextColor3 = CurrentTheme.Text
+        ThemeTgl.BackgroundColor3 = CurrentTheme.Border
+        for _, v in pairs(tabs) do
+            v.b.BackgroundColor3 = v.p.Visible and CurrentTheme.TabActive or CurrentTheme.TabInActive
+            v.b.TextColor3 = v.p.Visible and CurrentTheme.Primary or CurrentTheme.SecText
+            for _, item in pairs(v.p:GetChildren()) do
+                if item:IsA("Frame") and item:FindFirstChildOfClass("TextLabel") then
+                    item:FindFirstChildOfClass("TextLabel").TextColor3 = CurrentTheme.SecText
+                elseif item:IsA("TextLabel") then
+                    item.TextColor3 = CurrentTheme.SecText
+                end
+            end
+        end
+    end)
+
+    return LiteFlux
+end
